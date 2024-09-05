@@ -1,0 +1,100 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LibraGo - Library Management</title>
+</head>
+<body>
+    <h1>LibraGo Library Management</h1>
+
+    <!-- Create a new book -->
+    <h2>Create a New Book</h2>
+    <form action="/books" method="post">
+        <input type="text" name="title" placeholder="Book Title" required>
+        <input type="text" name="author" placeholder="Author" required>
+        <button type="submit">Create Book</button>
+    </form>
+
+    <hr>
+
+    <!-- Update an existing book -->
+    <h2>Update an Existing Book</h2>
+    <form action="/books" method="post" onsubmit="updateBook(event)">
+        <input type="text" id="update-id" placeholder="Book ID" required>
+        <input type="text" id="update-title" placeholder="New Title" required>
+        <input type="text" id="update-author" placeholder="New Author" required>
+        <button type="submit">Update Book</button>
+    </form>
+
+    <hr>
+
+    <!-- Delete a book -->
+    <h2>Delete a Book</h2>
+    <form action="/books" method="post" onsubmit="deleteBook(event)">
+        <input type="text" id="delete-id" placeholder="Book ID" required>
+        <button type="submit">Delete Book</button>
+    </form>
+
+    <hr>
+
+    <!-- List all books -->
+    <h2>List All Books</h2>
+    <button onclick="listBooks()">List Books</button>
+    <ul id="books-list"></ul>
+
+    <script>
+        // JavaScript to handle form actions and fetch from API
+
+        // Update a book via PUT request
+        function updateBook(event) {
+            event.preventDefault();
+            const id = document.getElementById('update-id').value;
+            const title = document.getElementById('update-title').value;
+            const author = document.getElementById('update-author').value;
+
+            fetch(`/books/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, author })
+            })
+            .then(response => response.json())
+            .then(data => alert(`Book Updated: ${JSON.stringify(data)}`))
+            .catch(error => alert(`Error: ${error}`));
+        }
+
+        // Delete a book via DELETE request
+        function deleteBook(event) {
+            event.preventDefault();
+            const id = document.getElementById('delete-id').value;
+
+            fetch(`/books/${id}`, { method: 'DELETE' })
+            .then(response => {
+                if (response.status === 204) {
+                    alert('Book deleted successfully');
+                } else {
+                    alert('Error deleting book');
+                }
+            })
+            .catch(error => alert(`Error: ${error}`));
+        }
+
+        // List all books via GET request
+        function listBooks() {
+            fetch('/books')
+            .then(response => response.json())
+            .then(books => {
+                const booksList = document.getElementById('books-list');
+                booksList.innerHTML = '';
+                books.forEach(book => {
+                    const li = document.createElement('li');
+                    li.textContent = `ID: ${book.id}, Title: ${book.title}, Author: ${book.author}`;
+                    booksList.appendChild(li);
+                });
+            })
+            .catch(error => alert(`Error: ${error}`));
+        }
+    </script>
+</body>
+</html>
